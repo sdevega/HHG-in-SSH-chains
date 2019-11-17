@@ -140,10 +140,10 @@ rho0 = V*(rho0j*V');           % in the site representation
 
 %% --- ODE solver
 
-% general info:        https://es.mathworks.com/help/matlab/ordinary-differential-equations.html
-% specific for ode113: https://es.mathworks.com/help/matlab/ref/ode113.html
+% general info:       https://es.mathworks.com/help/matlab/ordinary-differential-equations.html
+% specific for ode45: https://es.mathworks.com/help/matlab/ref/ode45.html
 
-% [t,y] = ode113(odefun,tspan,y0), where tspan = [t0 tf], integrates the system of
+% [t,y] = ode45(odefun,tspan,y0), where tspan = [t0 tf], integrates the system of
 % differential equations y'=f(t,y) from t0 to tf with initial conditions y0.
 % Nonstiff ODE
 % Each row in the solution array y corresponds to a value returned in column vector t.
@@ -206,7 +206,7 @@ set(gca,'TickDir','out');
 nw = 1000; 
 w  = linspace(0.001/eV,7/eV,nw);
 
-nout2 = sprintf('chain_ode23s_hhg_N%i_t1%g_t2%g_I14_w%g.dat',N,t1*eV,t2*eV,omega*eV);
+nout2 = sprintf('chain_ode45_hhg_N%i_t1%g_t2%g_I14_w%g.dat',N,t1*eV,t2*eV,omega*eV);
 fout2 = fopen(nout2,'w');
 
 pindw = zeros(nw,1);
@@ -278,84 +278,28 @@ wc  =  1.22652;
 
 % https://es.mathworks.com/help/matlab/math/choose-an-ode-solver.html
 
-% retrieved in Matlab - ode113
-nin1   = sprintf('chain_ode113_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
-dataw  = dlmread(nin1,'',0,0);
-wf     = dataw(:,1);  % eV
-pre    = dataw(:,2);  % a.u.
-pim    = dataw(:,3);  % a.u.
-
-% model: from charpa - RK45
-nin2   = sprintf('cchain_N%i_Q0_gam50_I14_gauss_100fs_a0.1421_t1%g_t2%g_HF1_w%g.dat',Nc,t1c,t2c,wc);
-dataw2 = dlmread(nin2,'',0,0);
-wm     = dataw2(:,1);  % eV
-prem   = dataw2(:,2);  % a.u.
-pimm   = dataw2(:,3);  % a.u.
 
 % retrieved in Matlab with RK45 - ode45
-nin3    = sprintf('chain_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
-dataw3  = dlmread(nin3,'',0,0);
-wf3     = dataw3(:,1);  % eV
-pre3    = dataw3(:,2);  % a.u.
-pim3    = dataw3(:,3);  % a.u.
+nin1    = sprintf('chain_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
+dataw1  = dlmread(nin1,'',0,0);
+wf1     = dataw1(:,1);  % eV
+pre1    = dataw1(:,2);  % a.u.
+pim1    = dataw1(:,3);  % a.u.
 
-% retrieved in Matlab with ode15s
-nin4    = sprintf('chain_ode15s_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
-dataw4  = dlmread(nin4,'',0,0);
-wf4     = dataw4(:,1);  % eV
-pre4    = dataw4(:,2);  % a.u.
-pim4    = dataw4(:,3);  % a.u.
 
-% retrieved in Matlab with ode23
-nin5    = sprintf('chain_ode23_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
-dataw5  = dlmread(nin5,'',0,0);
-wf5     = dataw5(:,1);  % eV
-pre5    = dataw5(:,2);  % a.u.
-pim5    = dataw5(:,3);  % a.u.
-
-% retrieved in Matlab with ode23
-%nin6    = sprintf('chain_ode23s_hhg_N%i_t1%g_t2%g_I14_w%g.dat',Nc,t1c,t2c,wc);
-%dataw6  = dlmread(nin6,'',0,0);
-%wf6     = dataw6(:,1);  % eV
-%pre6    = dataw6(:,2);  % a.u.
-%pim6    = dataw6(:,3);  % a.u.
-
-p0  = sqrt(pre.^2  + pim.^2);
-p0m = sqrt(prem.^2 + pimm.^2);
-p03 = sqrt(pre3.^2 + pim3.^2);
-p04 = sqrt(pre4.^2 + pim4.^2);
-p05 = sqrt(pre5.^2 + pim5.^2);
-%p06 = sqrt(pre6.^2 + pim6.^2);
+p01 = sqrt(pre1.^2 + pim1.^2);
 
 
 figure
-semilogy(wm,p0m,'*b','Linewidth',2)
-hold on
-semilogy(wf,p0,'om','Linewidth',2)
-hold on
-semilogy(wf3,p03,'xk','Linewidth',2)
-hold on
-semilogy(wf4,p04,'+g','Linewidth',2)
-hold on
-%semilogy(wf5,p05,'sy','Linewidth',2)
-%hold on
-%semilogy(wf6,p06,'sc','Linewidth',2)
+semilogy(wf1,p01,'xk','Linewidth',2)
+
 xlabel('$\hbar\omega_{out}$ (eV)', 'Interpreter', 'latex');
 ylabel('$|p_{ind}|$ (a.u.)', 'Interpreter', 'latex');
 xlim([0 7])
-legend('charpa','ode113','ode45','ode15s')
+legend('ode45')
 set(gca,'FontSize',15);
 set(gca,'TickDir','out');
 
-
-%figure
-%plot(wf,pim,'-m','Linewidth',2)
-%xlabel('$\hbar\omega_{out}$ (eV)', 'Interpreter', 'latex');
-%ylabel('Im \{$p_{ind}$\} (a.u.)', 'Interpreter', 'latex');
-%xlim([0 7])
-%title('matlab')
-%set(gca,'FontSize',15);
-%set(gca,'TickDir','out');
 
 
 %% --- Other FT
